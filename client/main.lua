@@ -868,6 +868,36 @@ local function getDataForHouseTier(house, coords)
         return exports['qb-interior']:CreateV2Modern2(coords)
     elseif Config.Houses[house].tier == 85 then
         return exports['qb-interior']:CreateV2Modern3(coords)
+    elseif Config.Houses[house].tier == 86 then
+        return exports['qb-interior']:VineWoodHouse1(coords)
+    elseif Config.Houses[house].tier == 87 then
+        return exports['qb-interior']:VineWoodHouse2(coords)
+    elseif Config.Houses[house].tier == 88 then
+        return exports['qb-interior']:VineWoodHouse3(coords)
+    elseif Config.Houses[house].tier == 89 then
+        return exports['qb-interior']:CreateK4GunWarehouse(coords)
+    elseif Config.Houses[house].tier == 90 then
+        return exports['qb-interior']:CreateK4LuxuryHouse1(coords)
+    elseif Config.Houses[house].tier == 91 then
+        return exports['qb-interior']:CreateK4LuxuryHouse2(coords)
+    elseif Config.Houses[house].tier == 92 then
+        return exports['qb-interior']:CreateK4LuxuryHouse3(coords)
+    elseif Config.Houses[house].tier == 93 then
+        return exports['qb-interior']:CreateK4LuxuryHouse4(coords)
+    elseif Config.Houses[house].tier == 94 then
+        return exports['qb-interior']:CreateK4ManorHouse(coords)
+    elseif Config.Houses[house].tier == 95 then
+        return exports['qb-interior']:CreateK4Garage1(coords)
+    elseif Config.Houses[house].tier == 96 then
+        return exports['qb-interior']:CreateK4Garage2(coords)
+    elseif Config.Houses[house].tier == 97 then
+        return exports['qb-interior']:CreateK4Garage3(coords)
+    elseif Config.Houses[house].tier == 98 then
+        return exports['qb-interior']:CreateK4Garage4(coords)
+    elseif Config.Houses[house].tier == 99 then
+        return exports['qb-interior']:CreateK4Safehouse(coords)
+    elseif Config.Houses[house].tier == 100 then
+        return exports['qb-interior']:CreateK4Warehouse(coords)
     else
         QBCore.Functions.Notify(Lang:t("error.invalid_tier"), 'error')
     end
@@ -974,6 +1004,48 @@ end
 
 exports('isNearHouses', isNearHouses)
 
+local function openHouseStash()
+    if not CurrentHouse then return end
+    local stashLoc = vector3(stashLocation.x, stashLocation.y, stashLocation.z)
+    if CheckDistance(stashLoc, 1.5) then
+        local houseTier = tonumber(Config.Houses[CurrentHouse].tier)
+        if Config.StashWeights[houseTier] and tonumber(Config.StashWeights[houseTier].maxweight) and tonumber(Config.StashWeights[houseTier].slots) then
+            TriggerServerEvent("inventory:server:OpenInventory", "stash", CurrentHouse, Config.StashWeights[houseTier])
+        else
+            TriggerServerEvent("inventory:server:OpenInventory", "stash", CurrentHouse)
+        end
+        TriggerEvent("inventory:client:SetCurrentStash", CurrentHouse)
+        TriggerServerEvent("InteractSound_SV:PlayOnSource", "StashOpen", 0.4)
+    end
+end
+
+local function openOutfitMenu()
+    if not CurrentHouse then return end
+    local outfitLoc = vector3(outfitLocation.x, outfitLocation.y, outfitLocation.z)
+    if CheckDistance(outfitLoc, 1.5) then
+        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Clothes1", 0.4)
+        TriggerEvent('qb-clothing:client:openOutfitMenu')
+    end
+end
+
+local function changeCharacter()
+    if not CurrentHouse then return end
+    local logoutLoc = vector3(logoutLocation.x, logoutLocation.y, logoutLocation.z)
+    if CheckDistance(logoutLoc, 1.5) then
+        DoScreenFadeOut(250)
+        while not IsScreenFadedOut() do
+            Wait(10)
+        end
+        exports['qb-interior']:DespawnInterior(houseObj, function()
+            TriggerEvent('qb-weathersync:client:EnableSync')
+            SetEntityCoords(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.x, Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z + 0.5)
+            SetEntityHeading(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.h)
+            InOwnedHouse = false
+            IsInside = false
+            TriggerServerEvent('qb-houses:server:LogoutLocation')
+        end)
+    end
+end
 -- Events
 
 RegisterNetEvent('qb-houses:server:sethousedecorations', function(house, decorations)
@@ -1421,41 +1493,6 @@ RegisterNetEvent('qb-houses:client:AnswerDoorbell', function()
     end
 end)
 
-RegisterNetEvent('qb-houses:client:OpenStash', function()
-    local stashLoc = vector3(stashLocation.x, stashLocation.y, stashLocation.z)
-    if CheckDistance(stashLoc, 1.5) then
-        TriggerServerEvent("inventory:server:OpenInventory", "stash", CurrentHouse)
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "StashOpen", 0.4)
-        TriggerEvent("inventory:client:SetCurrentStash", CurrentHouse)
-    end
-end)
-
-RegisterNetEvent('qb-houses:client:ChangeCharacter', function()
-    local stashLoc = vector3(logoutLocation.x, logoutLocation.y, logoutLocation.z)
-    if CheckDistance(stashLoc, 1.5) then
-        DoScreenFadeOut(250)
-        while not IsScreenFadedOut() do
-            Wait(10)
-        end
-        exports['qb-interior']:DespawnInterior(houseObj, function()
-            TriggerEvent('qb-weathersync:client:EnableSync')
-            SetEntityCoords(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.x, Config.Houses[CurrentHouse].coords.enter.y, Config.Houses[CurrentHouse].coords.enter.z + 0.5)
-            SetEntityHeading(PlayerPedId(), Config.Houses[CurrentHouse].coords.enter.h)
-            InOwnedHouse = false
-            IsInside = false
-            TriggerServerEvent('qb-houses:server:LogoutLocation')
-        end)
-    end
-end)
-
-RegisterNetEvent('qb-houses:client:ChangeOutfit', function()
-    local outfitLoc = vector3(outfitLocation.x, outfitLocation.y, outfitLocation.z)
-    if CheckDistance(outfitLoc, 1.5) then
-        TriggerServerEvent("InteractSound_SV:PlayOnSource", "Clothes1", 0.4)
-        TriggerEvent('qb-clothing:client:openOutfitMenu')
-    end
-end)
-
 RegisterNetEvent('qb-houses:client:ViewHouse', function()
     local houseCoords = vector3(Config.Houses[ClosestHouse].coords.enter.x, Config.Houses[ClosestHouse].coords.enter.y, Config.Houses[ClosestHouse].coords.enter.z)
     if CheckDistance(houseCoords, 1.5) then
@@ -1525,7 +1562,7 @@ CreateThread(function ()
             if isInsideStashTarget then
                 wait = 0
                 if IsControlJustPressed(0, 38) then
-                    TriggerEvent('qb-houses:client:OpenStash')
+                    openHouseStash()
                     exports['qb-core']:HideText()
                 end
             end
@@ -1533,7 +1570,7 @@ CreateThread(function ()
             if isInsideOutfitsTarget then
                 wait = 0
                 if IsControlJustPressed(0, 38) then
-                    TriggerEvent('qb-houses:client:ChangeOutfit')
+                    openOutfitMenu()
                     exports['qb-core']:HideText()
                 end
             end
@@ -1541,7 +1578,7 @@ CreateThread(function ()
             if isInsiteCharactersTarget then
                 wait = 0
                 if IsControlJustPressed(0, 38) then
-                    TriggerEvent('qb-houses:client:ChangeCharacter')
+                    changeCharacter()
                     exports['qb-core']:HideText()
                 end
             end
