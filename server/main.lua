@@ -185,7 +185,7 @@ RegisterNetEvent('qb-houses:server:addNewHouse', function(street, coords, price,
     }
     TriggerClientEvent("qb-houses:client:setHouseConfig", -1, Config.Houses)
     TriggerClientEvent('QBCore:Notify', src, Lang:t("info.added_house", {value = label}))
-    TriggerEvent('qb-log:server:CreateLog', 'house', Lang:t("log.house_created"), 'green', Lang:t("log.house_address", {label = label, price = price, tier = tier, agent = GetPlayerName(src)}))
+    TriggerEvent('qb-log:server:CreateLog', src, 'house', Lang:t("log.house_created"), 'green', Lang:t("log.house_address", {label = label, price = price, tier = tier, agent = GetPlayerName(src)}))
 end)
 
 RegisterNetEvent('qb-houses:server:addGarage', function(house, coords)
@@ -238,7 +238,7 @@ RegisterNetEvent('qb-houses:server:buyHouse', function(house)
         TriggerClientEvent('qb-house:client:RefreshHouseTargets', src)
         pData.Functions.RemoveMoney('bank', HousePrice, "bought-house") -- 21% Extra house costs
         exports['qb-management']:AddMoney("realestate", (HousePrice / 100) * math.random(18, 25))
-        TriggerEvent('qb-log:server:CreateLog', 'house', Lang:t("log.house_purchased"), 'green', Lang:t("log.house_purchased_by", {house = house:upper(), price = HousePrice, firstname = pData.PlayerData.charinfo.firstname, lastname = pData.PlayerData.charinfo.lastname}))
+        TriggerEvent('qb-log:server:CreateLog', src, 'house', Lang:t("log.house_purchased"), 'green', Lang:t("log.house_purchased_by", {house = house:upper(), price = HousePrice, firstname = pData.PlayerData.charinfo.firstname, lastname = pData.PlayerData.charinfo.lastname}))
         TriggerClientEvent('QBCore:Notify', src, Lang:t("success.house_purchased"), 'success', 5000)
     else
         TriggerClientEvent('QBCore:Notify', src, Lang:t("error.not_enough_money"), "error")
